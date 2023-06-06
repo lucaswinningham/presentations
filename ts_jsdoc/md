@@ -1,0 +1,569 @@
+---
+marp: true
+# theme: github
+class: invert
+# paginate: true
+---
+
+<style>
+  .container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .container.col {
+    margin: 1rem;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<div class="container">
+  <div classs="col">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4c/Typescript_logo_2020.svg" />
+  </div>
+
+  <div classs="col">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/Javascript_Logo.png" />
+  </div>
+</div>
+
+---
+
+
+<!--color: white-->
+<!--backgroundColor: #3178c6-->
+
+# <!--fit-->TypeScript
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Static typechecker for JavaScript programs
+
+<!-- A tool that runs _before_ your code runs (static) -->
+<!-- Ensures that the types of the program are correct (typechecked) -->
+
+---
+
+<!-- Suppose -->
+
+##### staticTypechecker/greet.ts
+
+```ts
+type Person = string;
+
+type Greet = (person: Person, date: Date) => void;
+
+const greet: Greet = (person, date) => {
+  console.log(`Hello ${person}, today is ${date}!`);
+};
+ 
+greet('Luke');
+```
+
+---
+
+<!-- Install TypeScript and run our file -->
+
+```sh
+$ npm i -g typescript
+```
+
+```sh
+$ tsc --noEmitOnError staticTypechecker/greet.ts
+greet.ts:9:1 - error TS2554: Expected 2 arguments, but got 1.
+
+9 greet("Luke");
+  ~~~~~~~~~~~~~~~~
+
+  greet.ts:3:31
+    3 type Greet = (person: Person, date: Date) => void;
+                                    ~~~~~~~~~~
+    An argument for 'date' was not provided.
+
+
+Found 1 error in greet.ts:9
+```
+
+<!-- This is more or less what you'll see in intellisense if applicable -->
+
+---
+
+##### staticTypechecker/betterGreet.ts
+
+```ts
+...
+
+greet('Luke', new Date());
+```
+
+```sh
+$ tsc --noEmitOnError staticTypechecker/betterGreet.ts
+```
+
+##### staticTypechecker/betterGreet.js
+
+```js
+var greet = function (person, date) {
+    console.log("Hello ".concat(person, ", today is ").concat(date, "!"));
+};
+greet("Luke", new Date());
+```
+
+<!-- Type annotations are gone -->
+<!-- Browsers don't recognize TypeScript, needs compiled to Javascript -->
+
+<!-- Template string syntax converted to string concatenation -->
+<!-- Able to write in latest ECMAScript and compiler "downlevels" to ECMAScript 3 ubiquitous to browsers -->
+
+<!-- Type annotations never change the runtime behavior of your program. -->
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Types
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Basic Types
+
+##### types/basicTypes.ts
+
+```ts
+type Primitive = string | number | boolean | bigint | symbol; // union
+type Person = {
+  name: Primitive;
+  age: Primitive;
+  isAwesome?: Primitive; // optional
+};
+
+const luke: Person = {
+  name: 'Luke',
+  age: 25, // at heart
+  // isAwesome: ??? // undefined, jury's out
+};
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Union Types
+
+##### types/unionTypes.ts
+
+```ts
+type Flag = 'auto' | 'all' | 'rec'; // literal union
+type Options = { width: number; height: number };
+
+const configure = (x: Options | Flag) => {};
+
+configure({ width: 100, height: 100 });
+configure('auto');
+configure('automatic');
+// Argument of type '"automatic"' is not
+//   assignable to parameter of type 'Options | Flag'
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Function Types
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Function Type Expressions
+
+##### types/functionTypes/functionTypeExpressions.ts
+
+```ts
+const greeter = (fn: (a: string) => void) => fn('Hello, World');
+
+greeter(console.log);
+
+// Parameter name is required:
+type HiFn = (string) => void;
+// Parameter has a name but no type.
+//   Did you mean 'arg0: string'?
+// (parameter) string: any
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Generic Functions
+
+##### types/functionTypes/genericFunctions.ts
+
+```ts
+// const firstElement: (arr: any[]) => any
+const firstElement = (arr: any[]) => arr[0];
+
+// const firstElementToo: <Type>(arr: Type[]) => Type | undefined
+const firstElementToo = <Type>(arr: Type[]): Type | undefined => arr[0];
+
+// const s: string | undefined
+const s = firstElementToo(['a', 'b', 'c']);
+// const u: undefined
+const u = firstElementToo([]);
+
+// Inference
+
+const map = <Input, Output>(arr: Input[], func: (arg: Input) => Output): Output[] => arr.map(func);
+
+// (parameter) n: string
+// const parsed: number[]
+const parsed = map(['1', '2', '3'], (n) => parseInt(n));
+```
+
+<!-- Note that in this example (parsed), TypeScript could infer both the type of the Input type parameter (from the given string array), as well as the Output type parameter based on the return value of the function expression (number). -->
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Constraints
+
+##### types/functionTypes/constraints.ts
+
+```ts
+const longest = <T extends { length: number }>(a: T, b: T) =>
+  (a.length >= b.length) ? a : b;
+ 
+// const longerArray: number[]
+const longerArray = longest([1, 2], [1, 2, 3]);
+// const longerString: "alice" | "bob"
+const longerString = longest('alice', 'bob');
+
+const notOK = longest(10, 100); // ❌
+// Argument of type 'number' is not assignable
+//   to parameter of type '{ length: number; }'
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Constraints (cont'd)
+
+<!-- Common problem! -->
+
+##### types/functionTypes/constraintsContd.ts
+
+```ts
+type MinimumLength = <T extends { length: number }>(obj: T, min: number) => T;
+
+const minLength: MinimumLength = (obj, min) => {
+  if (obj.length >= min) {
+    return obj;
+  } else {
+    return { length: min };
+// T '{ length: number; }' is not assignable to type 'T'.
+//   '{ length: number; }' is assignable to the constraint of type 'T',
+//     but 'T' could be instantiated with a different
+//     subtype of constraint '{ length: number; }'.
+  }
+};
+
+// 'arr' gets value { length: 6 }
+const arr = minimumLength([1, 2, 3], 6);
+// and crashes here because the returned object does not have a 'slice' method!
+console.log(arr.slice(0));
+```
+
+<!-- It might look like this function is OK - Type is constrained to { length: number }, and the function either returns Type or a value matching that constraint. The problem is that the function promises to return the same kind of object as was passed in, not just some object matching the constraint. If this code were legal, you could write code that definitely wouldn’t work: -->
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Specifying Type Arguments
+
+##### types/functionTypes/specifyingTypeArguments.ts
+
+```ts
+const combine = <T>(a1: T[], a2: T[]): T[] => a1.concat(a2);
+
+const arr = combine([1, 2, 3], ["hello"]);
+// Type 'string' is not assignable to type 'number'.
+
+const shhIsOk = combine<string | number>([1, 2, 3], ["hello"]);
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Guidelines
+
+##### types/functionTypes/guidelines.ts
+
+```ts
+// Push type parameters down
+const firstElement1 = <T>(a: T[])  => a[0];
+const firstElement2 = <T extends any[]>(a: T)  => a[0];
+const a = firstElement1([1, 2, 3]); // ✅ const a: number
+const b = firstElement2([1, 2, 3]); // ❌ const b: any
+
+// Use fewer type Parameters
+const filter1 = <T>(a: T[], f: (arg: T) => boolean): T[] => a.filter(f); // ✅
+const filter2 = <T, F extends (arg: T) => boolean>(a: T[], f: F): T[] => a.filter(f); // ❌
+
+// Type parameters should appear twice
+const greet1 = <Str extends string>(s: Str) => console.log('Hello, ' + s); // ❌
+const greet2 = (s: string) => console.log('Hello, ' + s); // ✅
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Structural Typing
+
+<!-- In contrast to nominal typing, more below -->
+<!-- TypeScript's system is structural -->
+<!-- Think duck-typing for a type system -->
+
+##### differences/structuralTyping.ts
+
+```ts
+type Ball = { r: number };
+type Sphere = { r: number };
+type Tube = { r: number; l: number };
+
+let ball: Ball = { r: 10 };
+let sphere: Sphere = { r: 20 };
+let tube: Tube = { r: 12, l: 3 };
+
+// ball = sphere; sphere = ball; ball = tube; sphere = tube; // ✅
+// tube = ball; tube = sphere; // ❌
+
+let createBall = (r: number) => ({ r });
+let createSphere = (r: number, metric: boolean) => ({ r: metric ? r : r * 0.39 });
+let createRedBall = (r: number) => ({ r, color: 'red' });
+
+// createSphere = createBall; createBall = createRedBall; // ✅
+// createBall = createSphere; // ❌
+// createRedBall = createBall; // ❌
+```
+
+<!-- First ❌ -->
+<!-- Property 'l' is missing in type 'Ball' but required in type 'Tube'. -->
+
+<!-- Because a ball does not have a length, then it cannot be -->
+<!-- assigned to the tube variable. However, all of the members -->
+<!-- of Ball are inside Tube, and so it can be assigned. -->
+
+<!-- Second ❌ -->
+<!-- Type '(r: number, metric: boolean) => { r: number; }' is not assignable to type '(r: number) => { r: number; }'. -->
+  <!-- Target signature provides too few arguments. Expected 2 or more, but got 1. -->
+
+<!-- Third ❌ -->
+<!-- Type '(r: number) => { r: number; }' is not assignable to type '(r: number) => { r: number; color: string; }'. -->
+  <!-- Property 'color' is missing in type '{ r: number; }' but required in type '{ r: number; color: string; }' -->
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Nominal Typing
+
+<!-- C++, Java, and Swift -->
+<!-- Each type is unique -->
+<!-- Even if types have the same data, you can't assign across types -->
+<!-- We can still get nominal typing from TypeScript like: -->
+
+##### differences/nominalTyping.ts
+
+```ts
+type USD = number & { __brand: 'USD' };
+type Brand<K, T> = K & { __brand: T };
+type EUR = Brand<number, 'EUR'>;
+
+const usd = 10 as USD; // `as`
+const eur = 10 as EUR; // `as`
+
+const gross = (net: USD, tax: USD): USD => (net + tax) as USD;
+
+gross(usd, usd); // ✅
+gross(eur, usd); // ❌
+// Argument of type 'EUR' is not assignable to parameter of type 'USD'.
+  // Type 'EUR' is not assignable to type '{ __brand: "USD"; }'.
+    // Types of property '__brand' are incompatible.
+      // Type '"EUR"' is not assignable to type '"USD"'.
+```
+
+---
+
+<div class="container" style="font-size:2rem;padding-bottom:1rem">
+  <div class="col" style="width:100%;text-align:center">
+
+# Interface
+  </div>
+  <div class="col" style="margin:1rem">
+
+# vs
+  </div>
+  <div class="col" style="width:100%;text-align:center">
+
+# Type
+  </div>
+</div>
+
+<!-- For the most part, interchangable -->
+
+<div class="container">
+  <div class="col" style="width:100%">
+
+##### differences/interface.ts
+
+```ts
+interface Animal {
+  name: string;
+}
+
+interface Bear extends Animal {
+  honey: boolean;
+}
+
+const bear = {} as Bear;
+bear.name;
+bear.honey;
+
+interface Bear extends Animal {
+  kind: 'grizzly' | 'black' | 'polar';
+} // reopen Bear
+```
+  </div>
+
+  <div class="col" style="margin:1rem"></div>
+
+  <div class="col" style="width:100%">
+
+##### differences/typeAlias.ts
+
+```ts
+type Animal = {
+  name: string;
+};
+
+type Bear = Animal & { 
+  honey: boolean;
+};
+
+const bear = {} as Bear;
+bear.name;
+bear.honey;
+
+type Bear = Animal & {
+  kind: 'grizzly' | 'black' | 'polar';
+}; // Error: Duplicate identifier Bear
+``` 
+  </div>
+</div>
+
+<!-- Type Assertions https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions -->
+
+<!-- ? and ! -->
+
+<!-- In JavaScript, if you access a property that doesn’t exist, you’ll get the value undefined rather than a runtime error. Because of this, when you read from an optional property, you’ll have to check for undefined before using it.
+
+function printName(obj: { first: string; last?: string }) {
+  // Error - might crash if 'obj.last' wasn't provided!
+  console.log(obj.last.toUpperCase());
+'obj.last' is possibly 'undefined'.
+  if (obj.last !== undefined) {
+    // OK
+    console.log(obj.last.toUpperCase());
+  }
+ 
+  // A safe alternative using modern JavaScript syntax:
+  console.log(obj.last?.toUpperCase());
+} -->
+
+<!-- Non-null Assertion Operator (Postfix!)
+TypeScript also has a special syntax for removing null and undefined from a type without doing any explicit checking. Writing ! after any expression is effectively a type assertion that the value isn’t null or undefined:
+
+function liveDangerously(x?: number | null) {
+  // No error
+  console.log(x!.toFixed());
+}
+Try
+Just like other type assertions, this doesn’t change the runtime behavior of your code, so it’s important to only use ! when you know that the value can’t be null or undefined. -->
+
+<!-- Generics section -->
+<!-- variants, covariants, invariants, contravariants -->
