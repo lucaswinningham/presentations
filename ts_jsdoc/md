@@ -57,15 +57,11 @@ class: invert
 ##### staticTypechecker/greet.ts
 
 ```ts
-type Person = string;
-
-type Greet = (person: Person, date: Date) => void;
-
-const greet: Greet = (person, date) => {
+const greet = (person: string, date: Date) => {
   console.log(`Hello ${person}, today is ${date}!`);
 };
  
-greet('Luke');
+greet('Luke'); // ❌
 ```
 
 ---
@@ -96,25 +92,27 @@ Found 1 error in greet.ts:9
 
 ---
 
-##### staticTypechecker/betterGreet.ts
+##### staticTypechecker/greetToo.ts
 
 ```ts
-...
-
-greet('Luke', new Date());
+const greetToo = (person: string, date: Date) => {
+  console.log(`Hello ${person}, today is ${date}!`);
+};
+ 
+greetToo('Luke', new Date()); // ✅
 ```
 
 ```sh
-$ tsc --noEmitOnError staticTypechecker/betterGreet.ts
+$ tsc --noEmitOnError staticTypechecker/greetToo.ts
 ```
 
-##### staticTypechecker/betterGreet.js
+##### staticTypechecker/greetToo.js
 
 ```js
-var greet = function (person, date) {
+var greetToo = function (person, date) {
     console.log("Hello ".concat(person, ", today is ").concat(date, "!"));
 };
-greet("Luke", new Date());
+greetToo('Luke', new Date()); // ✅
 ```
 
 <!-- Type annotations are gone -->
@@ -183,9 +181,9 @@ type Options = { width: number; height: number };
 
 const configure = (x: Options | Flag) => {};
 
-configure({ width: 100, height: 100 });
-configure('auto');
-configure('automatic');
+configure({ width: 100, height: 100 }); // ✅
+configure('auto'); // ✅
+configure('automatic'); // ❌
 // Argument of type '"automatic"' is not
 //   assignable to parameter of type 'Options | Flag'
 ```
@@ -215,12 +213,12 @@ configure('automatic');
 ##### types/functionTypes/functionTypeExpressions.ts
 
 ```ts
-const greeter = (fn: (a: string) => void) => fn('Hello, World');
+const greeter = (fn: (a: string) => void) => fn('Hello, World'); // ✅
 
 greeter(console.log);
 
 // Parameter name is required:
-type HiFn = (string) => void;
+type HiFn = (string) => void; // ❌
 // Parameter has a name but no type.
 //   Did you mean 'arg0: string'?
 // (parameter) string: any
@@ -241,10 +239,10 @@ type HiFn = (string) => void;
 
 ```ts
 // const firstElement: (arr: any[]) => any
-const firstElement = (arr: any[]) => arr[0];
+const firstElement = (arr: any[]) => arr[0]; // ❌
 
 // const firstElementToo: <Type>(arr: Type[]) => Type | undefined
-const firstElementToo = <Type>(arr: Type[]): Type | undefined => arr[0];
+const firstElementToo = <Type>(arr: Type[]): Type | undefined => arr[0]; // ✅
 
 // const s: string | undefined
 const s = firstElementToo(['a', 'b', 'c']);
@@ -305,9 +303,9 @@ const notOK = longest(10, 100); // ❌
 ##### types/functionTypes/constraintsContd.ts
 
 ```ts
-type MinimumLength = <T extends { length: number }>(obj: T, min: number) => T;
+type MinLength = <T extends { length: number }>(obj: T, min: number) => T;
 
-const minLength: MinimumLength = (obj, min) => {
+const minLength: MinLength = (obj, min) => {
   if (obj.length >= min) {
     return obj;
   } else {
@@ -320,9 +318,9 @@ const minLength: MinimumLength = (obj, min) => {
 };
 
 // 'arr' gets value { length: 6 }
-const arr = minimumLength([1, 2, 3], 6);
-// and crashes here because the returned object does not have a 'slice' method!
-console.log(arr.slice(0));
+const arr = minLength([1, 2, 3], 6);
+// and crashes here because { length: min } doesn't have a 'slice' method!
+console.log(arr.slice(0)); // ❌
 ```
 
 <!-- It might look like this function is OK - Type is constrained to { length: number }, and the function either returns Type or a value matching that constraint. The problem is that the function promises to return the same kind of object as was passed in, not just some object matching the constraint. If this code were legal, you could write code that definitely wouldn’t work: -->
@@ -343,10 +341,10 @@ console.log(arr.slice(0));
 ```ts
 const combine = <T>(a1: T[], a2: T[]): T[] => a1.concat(a2);
 
-const arr = combine([1, 2, 3], ["hello"]);
+const arr = combine([1, 2, 3], ["hello"]); // ❌
 // Type 'string' is not assignable to type 'number'.
 
-const shhIsOk = combine<string | number>([1, 2, 3], ["hello"]);
+const shhIsOk = combine<string | number>([1, 2, 3], ["hello"]); // ✅
 ```
 
 ---
@@ -358,24 +356,77 @@ const shhIsOk = combine<string | number>([1, 2, 3], ["hello"]);
   }
 </style>
 
-# Guidelines
+# Best Practices
 
-##### types/functionTypes/guidelines.ts
+##### types/functionTypes/bestPractices.ts
 
 ```ts
 // Push type parameters down
-const firstElement1 = <T>(a: T[])  => a[0];
-const firstElement2 = <T extends any[]>(a: T)  => a[0];
-const a = firstElement1([1, 2, 3]); // ✅ const a: number
-const b = firstElement2([1, 2, 3]); // ❌ const b: any
+const firstElement = <T extends any[]>(a: T)  => a[0]; // ❌
+const b = firstElement([1, 2, 3]); // ❌ const b: any
+const firstElementToo = <T>(a: T[])  => a[0]; // ✅
+const a = firstElementToo([1, 2, 3]); // ✅ const a: number
 
 // Use fewer type Parameters
-const filter1 = <T>(a: T[], f: (arg: T) => boolean): T[] => a.filter(f); // ✅
-const filter2 = <T, F extends (arg: T) => boolean>(a: T[], f: F): T[] => a.filter(f); // ❌
+const filter = <T, F extends (arg: T) => boolean>(a: T[], f: F): T[] => a.filter(f); // ❌
+const filterToo = <T>(a: T[], f: (arg: T) => boolean): T[] => a.filter(f); // ✅
 
 // Type parameters should appear twice
-const greet1 = <Str extends string>(s: Str) => console.log('Hello, ' + s); // ❌
-const greet2 = (s: string) => console.log('Hello, ' + s); // ✅
+const greet = <Str extends string>(s: Str) => console.log('Hello, ' + s); // ❌
+const greetToo = (s: string) => console.log('Hello, ' + s); // ✅
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Optional Parameters
+
+##### types/functionTypes/optionalParameters.ts
+
+```ts
+// (parameter) x: number | undefined
+const f = (x?: number) => x;
+f(); // ✅ -> undefined
+f(10); // ✅ -> 10
+f(undefined); // ✅ -> undefined
+
+// (parameter) x: number
+const g = (x: number = 5) => x;
+g(); // ✅ -> 5
+g(20); // ✅ -> 20
+g(undefined); // ✅ -> 5
+```
+
+---
+
+<style scoped>
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+</style>
+
+# Optional Parameters In Callbacks
+
+##### types/functionTypes/optionalParametersInCallbacks.ts
+
+```ts
+const myForEach = (a: any[], cb: (arg: any, i?: number) => void) => a.forEach(cb);
+myForEach([1, 2, 3], (a) => console.log(a)); // ✅
+myForEach([1, 2, 3], (a, i) => console.log(a, i)); // ✅
+myForEach([1, 2, 3], (a, i) => console.log(i.toFixed())); // ❌
+// 'i' is possibly 'undefined'
+
+const myForEachToo = (a: any[], cb: (arg: any, i: number) => void) => a.forEach(cb);
+myForEachToo([1, 2, 3], (a) => console.log(a)); // ✅
+myForEachToo([1, 2, 3], (a, i) => console.log(a, i)); // ✅
+myForEachToo([1, 2, 3], (a, i) => console.log(i.toFixed())); // ✅
 ```
 
 ---
@@ -535,6 +586,16 @@ type Bear = Animal & {
 ``` 
   </div>
 </div>
+
+---
+
+<!--color: white-->
+
+Questions
+
+![bg](https://gifdb.com/images/high/confused-nerd-steve-brule-eixtr1f0qii8fthl.gif)
+
+<!-- Should I pamphletize this presentation? -->
 
 <!-- Type Assertions https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions -->
 

@@ -1,9 +1,5 @@
-type Person = string;
-
-type Greet = (person: Person, date: Date) => void;
-
-const greet: Greet = (person, date) => {
+const greet = (person: string, date: Date) => {
   console.log(`Hello ${person}, today is ${date}!`);
 };
  
-greet('Luke');
+greet('Luke'); // ❌

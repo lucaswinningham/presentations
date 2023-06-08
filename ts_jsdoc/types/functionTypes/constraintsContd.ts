@@ -1,6 +1,6 @@
-type MinimumLength = <T extends { length: number }>(obj: T, min: number) => T;
+type MinLength = <T extends { length: number }>(obj: T, min: number) => T;
 
-const minLength: MinimumLength = (obj, min) => {
+const minLength: MinLength = (obj, min) => {
   if (obj.length >= min) {
     return obj;
   } else {
@@ -11,3 +11,8 @@ const minLength: MinimumLength = (obj, min) => {
 //     subtype of constraint '{ length: number; }'.
   }
 };
+
+// 'arr' gets value { length: 6 }
+const arr = minLength([1, 2, 3], 6);
+// and crashes here because { length: min } doesn't have a 'slice' method!
+console.log(arr.slice(0)); // ❌
