@@ -1,0 +1,1 @@
+type WhatIsThis<T> = T extends object ? { [P in keyof T]+?: WhatIsThis<T[P]>; } : T;

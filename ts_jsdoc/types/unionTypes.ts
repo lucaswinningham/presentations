@@ -1,4 +1,4 @@
-type Flag = 'auto' | 'all' | 'rec'; // literal union
+type Flag = 'auto' | 'all' | 'rec'; // union of string literals
 type Options = { width: number; height: number };
 
 const configure = (x: Options | Flag) => {};

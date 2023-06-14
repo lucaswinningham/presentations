@@ -1,0 +1,1 @@
+import { Cat, Dog, generateName } from './animal';

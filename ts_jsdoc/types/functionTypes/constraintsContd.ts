@@ -14,5 +14,5 @@ const minLength: MinLength = (obj, min) => {
 
 // 'arr' gets value { length: 6 }
 const arr = minLength([1, 2, 3], 6);
-// and crashes here because { length: min } doesn't have a 'slice' method!
+// and crashes here because the returned object doesn't have a 'slice' method!
 console.log(arr.slice(0)); // ❌

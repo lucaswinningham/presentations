@@ -11,8 +11,8 @@ const u = firstElementToo([]);
 
 // Inference
 
-const map = <Input, Output>(arr: Input[], func: (arg: Input) => Output): Output[] => arr.map(func);
+const myMap = <In, Out>(arr: In[], func: (arg: In) => Out): Out[] => arr.map(func);
 
 // (parameter) n: string
 // const parsed: number[]
-const parsed = map(['1', '2', '3'], (n) => parseInt(n));
+const parsed = myMap(['1', '2', '3'], (n) => parseInt(n));

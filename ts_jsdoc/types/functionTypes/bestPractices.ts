@@ -7,7 +7,3 @@ const a = firstElementToo([1, 2, 3]); // ✅ const a: number
 // Use fewer type Parameters
 const filter = <T, F extends (arg: T) => boolean>(a: T[], f: F): T[] => a.filter(f); // ❌
 const filterToo = <T>(a: T[], f: (arg: T) => boolean): T[] => a.filter(f); // ✅
-
-// Type parameters should appear twice
-const greet = <Str extends string>(s: Str) => console.log('Hello, ' + s); // ❌
-const greetToo = (s: string) => console.log('Hello, ' + s); // ✅

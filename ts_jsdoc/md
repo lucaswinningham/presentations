@@ -16,6 +16,13 @@ class: invert
     width: 100%;
     height: 100%;
   }
+  h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+  h1,h2,h3,h4,h5,h6 {
+    margin: 0;
+  }
 </style>
 
 <div class="container">
@@ -30,20 +37,12 @@ class: invert
 
 ---
 
-
 <!--color: white-->
 <!--backgroundColor: #3178c6-->
 
 # <!--fit-->TypeScript
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Static typechecker for JavaScript programs
 
@@ -125,58 +124,45 @@ greetToo('Luke', new Date()); // ✅
 
 ---
 
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
-
 # Types
 
 ---
 
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
+# Primitive Types
 
-# Basic Types
-
-##### types/basicTypes.ts
+##### types/primitiveTypes.ts
 
 ```ts
-type Primitive = string | number | boolean | bigint | symbol; // union
-type Person = {
-  name: Primitive;
-  age: Primitive;
-  isAwesome?: Primitive; // optional
-};
+// let name: string
+let name = 'Luke';
 
-const luke: Person = {
-  name: 'Luke',
-  age: 25, // at heart
-  // isAwesome: ??? // undefined, jury's out
-};
+// const age: number
+const age: number = 25; // at heart
+
+// const isAwesome: boolean
+const isAwesome: boolean = true;
+
+// const secondsUntilDeceased: bigint
+const secondsUntilDeceased = BigInt(10e1000);
+
+// let access: symbol
+let access: symbol;
+
+// const myNull: null
+const myNull = null;
+
+// const yomi: undefined
+const yomi = undefined;
 ```
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Union Types
 
 ##### types/unionTypes.ts
 
 ```ts
-type Flag = 'auto' | 'all' | 'rec'; // literal union
+type Flag = 'auto' | 'all' | 'rec'; // union of string literals
 type Options = { width: number; height: number };
 
 const configure = (x: Options | Flag) => {};
@@ -190,48 +176,28 @@ configure('automatic'); // ❌
 
 ---
 
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
-
 # Function Types
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Function Type Expressions
 
 ##### types/functionTypes/functionTypeExpressions.ts
 
 ```ts
-const greeter = (fn: (a: string) => void) => fn('Hello, World'); // ✅
+type GreeterFn = (a: string) => void;
+const greeter = (fn: GreeterFn) => fn('Hello, World'); // ✅
 
 greeter(console.log);
 
 // Parameter name is required:
-type HiFn = (string) => void; // ❌
+type HiFn = (string) => void; // ✅ (but also ❌)
 // Parameter has a name but no type.
 //   Did you mean 'arg0: string'?
 // (parameter) string: any
 ```
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Generic Functions
 
@@ -251,23 +217,16 @@ const u = firstElementToo([]);
 
 // Inference
 
-const map = <Input, Output>(arr: Input[], func: (arg: Input) => Output): Output[] => arr.map(func);
+const myMap = <In, Out>(arr: In[], func: (arg: In) => Out): Out[] => arr.map(func);
 
 // (parameter) n: string
 // const parsed: number[]
-const parsed = map(['1', '2', '3'], (n) => parseInt(n));
+const parsed = myMap(['1', '2', '3'], (n) => parseInt(n));
 ```
 
 <!-- Note that in this example (parsed), TypeScript could infer both the type of the Input type parameter (from the given string array), as well as the Output type parameter based on the return value of the function expression (number). -->
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Constraints
 
@@ -288,13 +247,6 @@ const notOK = longest(10, 100); // ❌
 ```
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Constraints (cont'd)
 
@@ -319,20 +271,13 @@ const minLength: MinLength = (obj, min) => {
 
 // 'arr' gets value { length: 6 }
 const arr = minLength([1, 2, 3], 6);
-// and crashes here because { length: min } doesn't have a 'slice' method!
+// and crashes here because the returned object doesn't have a 'slice' method!
 console.log(arr.slice(0)); // ❌
 ```
 
 <!-- It might look like this function is OK - Type is constrained to { length: number }, and the function either returns Type or a value matching that constraint. The problem is that the function promises to return the same kind of object as was passed in, not just some object matching the constraint. If this code were legal, you could write code that definitely wouldn’t work: -->
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Specifying Type Arguments
 
@@ -341,20 +286,14 @@ console.log(arr.slice(0)); // ❌
 ```ts
 const combine = <T>(a1: T[], a2: T[]): T[] => a1.concat(a2);
 
-const arr = combine([1, 2, 3], ["hello"]); // ❌
+const arr = combine([1, 2, 3], ['hello']); // ❌
 // Type 'string' is not assignable to type 'number'.
 
-const shhIsOk = combine<string | number>([1, 2, 3], ["hello"]); // ✅
+// const shhIsOk: (string | number)[]
+const shhIsOk = combine<string | number>([1, 2, 3], ['hello']); // ✅
 ```
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Best Practices
 
@@ -370,20 +309,9 @@ const a = firstElementToo([1, 2, 3]); // ✅ const a: number
 // Use fewer type Parameters
 const filter = <T, F extends (arg: T) => boolean>(a: T[], f: F): T[] => a.filter(f); // ❌
 const filterToo = <T>(a: T[], f: (arg: T) => boolean): T[] => a.filter(f); // ✅
-
-// Type parameters should appear twice
-const greet = <Str extends string>(s: Str) => console.log('Hello, ' + s); // ❌
-const greetToo = (s: string) => console.log('Hello, ' + s); // ✅
 ```
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Optional Parameters
 
@@ -395,48 +323,848 @@ const f = (x?: number) => x;
 f(); // ✅ -> undefined
 f(10); // ✅ -> 10
 f(undefined); // ✅ -> undefined
+f(null); // ✅ -> null
 
 // (parameter) x: number
 const g = (x: number = 5) => x;
 g(); // ✅ -> 5
 g(20); // ✅ -> 20
 g(undefined); // ✅ -> 5
+g(null); // ✅ -> null
 ```
 
 ---
 
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
+# void
 
-# Optional Parameters In Callbacks
+<!-- void represents the return value of functions which don’t return a value -->
+<!-- It’s the inferred type any time a function doesn’t have any return statements -->
+<!-- In JavaScript, a function that doesn’t return any value will implicitly return the value undefined -->
+<!-- However, void and undefined are not the same thing in TypeScript -->
 
-##### types/functionTypes/optionalParametersInCallbacks.ts
+##### types/functionTypes/void.ts
 
 ```ts
-const myForEach = (a: any[], cb: (arg: any, i?: number) => void) => a.forEach(cb);
-myForEach([1, 2, 3], (a) => console.log(a)); // ✅
-myForEach([1, 2, 3], (a, i) => console.log(a, i)); // ✅
-myForEach([1, 2, 3], (a, i) => console.log(i.toFixed())); // ❌
-// 'i' is possibly 'undefined'
+// const noop: () => void
+const noop = () => {};
+noop(); // -> undefined
 
-const myForEachToo = (a: any[], cb: (arg: any, i: number) => void) => a.forEach(cb);
-myForEachToo([1, 2, 3], (a) => console.log(a)); // ✅
-myForEachToo([1, 2, 3], (a, i) => console.log(a, i)); // ✅
-myForEachToo([1, 2, 3], (a, i) => console.log(i.toFixed())); // ✅
+// const noopExplicit: () => void
+const noopExplicit = () => { return; };
+noopExplicit() // -> undefined
+
+type VoidFunc = () => void;
+const f: VoidFunc = () => 'hi'; // ✅ ... wait, what?
+const result = f().length; // ❌ -> 2
+// Property 'length' does not exist on type 'void'
+
+// Array<T>.forEach(cb: (v: T, i: T, a: T[]) => void, thisArg?: any ): void
+// Array<number>.push(...items: number[]): number
+const a = [0];
+[1, 2, 3].forEach((el) => a.push(el)); // ✅
+```
+
+<!-- Array#push returns a number (the new length of the array), but it's a safe substitute to use for a void-returning function. -->
+
+<!-- Another way to think of this is that a void-returning callback type says "I'm not going to look at your return value, even if one exists". -->
+<!-- In other words, it doesn't matter what the return value is, it could be anything but it's inconsequential -->
+
+---
+
+# object
+
+<!-- The special type object refers to any value that isn’t a primitive (string, number, bigint, boolean, symbol, null, or undefined) -->
+
+##### types/functionTypes/object.ts
+
+```ts
+type MyObject = object; // `any` adjacent
+
+let myObject: MyObject;
+
+myObject = {}; // ✅
+myObject = { hi: 'hey' }; // ✅
+
+// Because functions;
+//  - have Object.prototype in their prototype chain
+//  - are instanceof Object
+//  - you can call Object.keys on them
+//  - etc.
+myObject = () => {}; // ✅
+
+myObject = 42; // ❌
+// Type 'number' is not assignable to type 'object'
 ```
 
 ---
 
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
+# unknown
+
+<!-- The unknown type represents any value -->
+<!-- Similar to the any type, but safer because it’s not legal to do anything with an unknown value -->
+
+##### types/functionTypes/unknown.ts
+
+```ts
+const f = (a: any) => a.b(); // ✅ (but also ❌)
+
+const g = (a: unknown) => a.b(); // ❌
+// 'a' is of type 'unknown'
+
+const h = (a: unknown) => a; // ✅
+```
+
+ <!-- Allows you to describe functions that accept any value without having any values in your function body. -->
+
+---
+
+# never
+
+<!-- Means that the function throws an exception or terminates execution of the program. -->
+<!-- Has other confusing meanings -->
+
+##### types/functionTypes/never.ts
+
+```ts
+const fail = (msg: string): never => {
+  throw new Error(msg);
+};
+```
+
+---
+
+# Function
+
+<!-- Has the special property that values of type Function can always be called but these calls return any -->
+
+##### types/functionTypes/function.ts
+
+```ts
+// const doSomething: (f: Function) => any
+const doSomething = (f: Function) => f(); // ❌ Unsafe
+
+// const doSomethingToo: (f: () => void) => void
+const doSomethingToo = (f: () => void) => f(); // ✅ Safer
+```
+
+---
+
+# Rest Parameters And Arguments
+
+<!-- implicitly any[] instead of any -->
+<!-- type annotations must be given in the form Array<T> or T[], or a tuple type (later) -->
+<!-- Arrays are mutable so it's best to freeze them -->
+
+<!-- TODO explain why the failure -->
+
+##### types/functionTypes/restParametersAndArguments.ts
+
+```ts
+// const myMax: (...nums: number[]) => number
+const myMax = (...nums: number[]) => Math.max(...nums);
+
+const theseNumbers = [1, 2];
+const thisMax = myMax(...theseNumbers); // ✅
+const thatMax = myMax(...[3, 4, 5]); // ✅
+const theOtherMax = myMax(6, 7, 8, 9); // ✅
+
+// const fullName: (fname: string, lname: string) => string
+const fullName = (fname: string, lname: string) => `${fname} ${lname}`;
+
+const myNames = ['Luke', 'Winningham'];
+const myFullName = fullName(...myNames); // ❌
+// A spread argument must either have a tuple type or be passed to a rest parameter.
+
+const myNamesToo = ['Luke', 'Winningham'] as const; // `as const`
+const myFullNameToo = fullName(...myNamesToo); // ✅
+
+const myNamesAgain = ['Luke', 'Winningham'] as [string, string];
+const myFullNameAgain = fullName(...myNamesAgain); // ✅
+```
+
+<!-- The failure is because TypeScript doesn't know that the array length matches the call signature requirements because the array could mutate at runtime. We can 'freeze' it with `as const` or we can type the array as Tuple type with `as [string, string]`, more on Tuple type later -->
+
+---
+
+# Parameter Destructuring
+
+##### types/functionTypes/parameterDestructuring.ts
+
+```ts
+type User = { id: string, name: string; age: number; iq: number };
+
+// Require `id`, all other properties optional
+type GetUserParams = Partial<User> & Pick<User, 'id'>;
+
+const getUser = ({ id, name = '', age, iq: userIQ }: GetUserParams): User => {
+  const userAge = age === undefined ? 39 : age; // ❌ boo hiss
+
+  const averageIQ = getAverageIQ();
+  const iq = userIQ ?? averageIQ; // ✅
+
+  return { id, name, age: userAge, iq };
+};
+
+const user = getUser({ id: 'a1b2c3d4' }); // ✅
+```
+
+---
+
+# Objects
+
+---
+
+# Optional
+
+##### types/objects/optional.ts
+
+```ts
+type User = { name?: string };
+const user1: User = {}; // ✅
+const user2: User = { name: 'Luke' }; // ✅
+// const username1: string | undefined
+const { name: username1 } = user1;
+// const username2: string | undefined
+const { name: username2 } = user2;
+
+type Concrete<Type> = { [Property in keyof Type]-?: Type[Property] };
+
+type ConfidentUser = Concrete<User>;
+
+const confidentUser1: ConfidentUser = {}; // ❌
+// Property 'name' is missing in type '{}' but required in type 'Concrete<User>'
+
+const confidentUser2: ConfidentUser = { name: 'Luke' }; // ✅
+// const confidentUserName2: string
+const { name: confidentUserName2 } = confidentUser2;
+```
+
+---
+
+# Readonly
+
+##### types/objects/readonly.ts
+
+```ts
+type User = { name: string };
+const user: User = { name: 'Luke' };
+user.name = '!Luke'; // ✅
+
+type ImmutableUser = { readonly name: string };
+const immutableUser: ImmutableUser = { name: 'Luke' };
+immutableUser.name = '!Luke'; // ❌
+// Cannot assign to 'name' because it is a read-only property.
+
+type Immutable<Type> = Readonly<Type>;
+type Mutable<Type> = { -readonly [Property in keyof Type]: Type[Property] };
+
+type MutableUser = Mutable<ImmutableUser>;
+const mutableUser: MutableUser = { name: 'Luke' };
+mutableUser.name = '!Luke'; // ✅
+```
+
+---
+
+# Index Signatures
+
+<!-- Useful for implementing the "dictionary" pattern -->
+
+##### types/objects/indexSignatures.ts
+
+```ts
+type NumberDictionary = {
+  [index: string]: number;
+  length: number; // ✅
+  name: string; // ❌
+  // Property 'name' of type 'string' is not assignable to 'string' index type 'number'
+};
+
+type NumStrDict = {
+  readonly [index: string]: number | string;
+  length: number; // ✅
+  readonly name: string; // ✅
+};
+
+const dictionary: NumStrDict = { length: 4, name: 'dict', hi: 'hey', why: 42 };
+
+dictionary.length = 5; // ✅
+dictionary.name = 'hwoops'; // ❌
+// Cannot assign to 'name' because it is a read-only property.
+dictionary.hi = 'oh no'; // ❌
+// Index signature in type 'NumStrDict' only permits reading.
+```
+
+---
+
+# Arrays
+
+##### types/objects/arrays.ts
+
+```ts
+type MyArray<Type> = Array<Type>;
+// same as
+type MyArrayToo<Type> = Type[];
+
+type MyImmutableArray<Type> = ReadonlyArray<Type>;
+// same as
+type MyImmutableArrayToo<Type> = readonly Type[];
+
+const myArray: string[] = [];
+myArray.push('hello'); // ✅
+
+const myImmutableArray: readonly string[] = ['hi', 'hey', 'yo'];
+myImmutableArray.push('sup'); // ❌
+// Property 'push' does not exist on type 'readonly string[]'
+```
+
+---
+
+# Tuples
+
+<!-- A tuple type is another sort of Array type that knows exactly how many elements it contains, and exactly which types it contains at specific positions. -->
+
+##### types/objects/tuples.ts
+
+```ts
+type Name = [string, string];
+const name: Name = ['Luke', 'Winningham']; // ✅
+const badName: Name = ['Lucas', 'James', 'Winningham']; // ❌
+// Type '[string, string, string]' is not assignable to type 'Name'.
+//   Source has 3 element(s) but target allows only 2.
+
+type State<T> = [T, (newState: T) => T];
+
+type Coordinates = [number, number, number?]; // 2D or 3D
+const d2: Coordinates = [1, 2]; // ✅
+const d3: Coordinates = [3, 4, 5]; // ✅
+
+type Pair = [string, number];
+// (parameter) one: string
+// (parameter) two: number
+const getPair = ([one, two, three]: Pair) => {}; // ❌
+// Tuple type 'Pair' of length '2' has no element at index '2'.
+
+type ReadonlyArbitraryTuple = readonly [string, number, ...boolean[]];
+const readonlyArbitraryTuple: ReadonlyArbitraryTuple = ['world', 3, true, false];
+readonlyArbitraryTuple[0] = 'hello'; // ❌
+// Cannot assign to '0' because it is a read-only property.
+```
+
+---
+
+# Generics
+
+<!-- We've already seen examples of generics -->
+
+---
+
+# keyof
+
+##### generics/keyof.ts
+
+```ts
+const getProperty = <Type, Key extends keyof Type>(obj: Type, key: Key) => obj[key];
+const x = { a: 1, b: 2, c: 3 };
+getProperty(x, 'a'); // ✅
+getProperty(x, 'd'); // ❌
+// Argument of type '"d"' is not assignable to parameter of type '"a" | "b" | "c"
+
+type Point = { x: number; y: number };
+// type P = "x" | "y"
+type P = keyof Point;
+
+type Arrayish = { [n: number]: unknown };
+// type A = number
+type A = keyof Arrayish;
+
+type Mapish = { [k: string]: boolean };
+// type M = string | number
+type M = keyof Mapish;
+
+// JavaScript object keys are always coerced to a string,
+// so obj[0] is always the same as obj["0"]
+```
+
+---
+
+# typeof
+
+<!-- exists in JavaScript already -->
+
+##### generics/typeof.ts
+
+```ts
+console.log(typeof "Hello world"); // -> "string"
+
+const f = () => ({ x: 10, y: 3 });
+
+type Return = ReturnType<f>; // ❌
+// 'f' refers to a value, but is being used as a type here. Did you mean 'typeof f'?
+
+// type FReturn = { x: number; y: number }
+type FReturn = ReturnType<typeof f>; // ✅
+```
+
+---
+
+# Indexed Access Types
+
+##### generics/indexedAccessTypes.ts
+
+```ts
+type Person = { age: number; name: string; alive: boolean };
+type People = Person[];
+const people: People = [{ name: 'Eve', age: 38, alive: false }];
+
+// type Age = number
+type Age = Person['age'];
+// type AgeOrName = string | number
+type AgeOrName = Person['age' | 'name'];
+// type KeyOfPerson = string | number | boolean
+type KeyOfPerson = Person[keyof Person];
+
+const aliveKey = 'alive';
+type Alive = Person[aliveKey]; // ❌
+// 'aliveKey' refers to a value, but is being used as a type here. Did you mean 'typeof aliveKey'?
+type AliveToo = Person['alve']; // ❌
+// Property 'alve' does not exist on type 'Person'
+
+type AliveKeyOrNameKey = 'alive' | 'name';
+// type AliveOrName = string | boolean
+type AliveOrName = Person[AliveKeyOrNameKey];
+
+// type PeoplePerson = { name: string; age: number; alive: boolean }
+type PeoplePerson = typeof people[number];
+// type AgeToo = number
+type AgeToo = typeof people[number]['age'];
+```
+
+---
+
+# Conditional Types
+
+##### generics/conditionalTypes.ts
+
+```ts
+type Flatten<T> = T extends any[] ? T[number] : T;
+
+// type Str = string
+type Str = Flatten<string[]>;
+
+// type Num = number
+type Num = Flatten<number>;
+
+// Using `infer`
+type FlattenToo<Type> = Type extends Array<infer Item> ? Item : Type;
+type ReturnTypeToo<T> = T extends (...a: never[]) => infer Return ? Return : never;
+
+// Distribution
+
+type ToArray<Type> = Type extends any ? Type[] : never;
+// type StrArrOrNumArr = string[] | number[]
+type StrArrOrNumArr = ToArray<string | number>;
+
+type ToArrayNonDist<Type> = [Type] extends [any] ? Type[] : never;
+// type StrOrNumArr = (string | number)[]
+type StrOrNumArr = ToArrayNonDist<string | number>;
+```
+
+---
+
+# Mapped Types
+
+##### generics/mappedTypes.ts
+
+```ts
+// generate types from other types
+type OptionsFlags<Type> = { [Property in keyof Type]: boolean };
+type TSCompile = { pretty: () => void; strict: () => void; noEmit: () => void };
+// type TSCompileOptions = { pretty: boolean; strict: boolean; noEmit: boolean }
+type TSCompileOptions = OptionsFlags<TSCompile>;
+
+type WithGetters<Type> = {
+  [Property in keyof Type as `get${Capitalize<string & Property>}`]: () => Type[Property]
+};
+
+type User = { name: string; age: number; location: string };
+
+// type GettableUser = { getName: () => string; getAge: () => number; getLocation: () => string }
+type GettableUser = WithGetters<User>;
+
+// Iterate over union
+type Callable<UnionTypes extends { kind: string }> = {
+  [Type in UnionTypes as Type['kind']]: (event: Type) => void;
+}
+
+type Square = { kind: 'square', l: number };
+type Circle = { kind: 'circle', r: number };
+
+// type ShapesCallable = { square: (event: Square) => void; circle: (event: Circle) => void }
+type ShapesCallable = Callable<Square | Circle>;
+```
+
+---
+
+# Template Literal Types
+
+##### generics/templateLiteralTypes.ts
+
+```ts
+// type Interjection = "HEY" | "HI"
+type Interjection = Uppercase<'hey' | 'hi'>;
+// type FormalGreeting = "Greetings" | "Hello"
+type FormalGreeting = Capitalize<'greetings' | 'hello'>;
+// type Target = "world" | "munda"
+type Target = Lowercase<'World' | 'Munda'>;
+ 
+// type Greetings =
+//   "HEY, world!" |
+//   "HEY, munda!" |
+//   "HI, world!" |
+//   "HI, munda!" |
+//   "Greetings, world!" |
+//   "Greetings, munda!" |
+//   "Hello, world!" |
+//   "Hello, munda!"
+type Greetings = `${Interjection | FormalGreeting}, ${Target}!`;
+// Honorable mention: Uncapitalize
+```
+
+---
+
+# Utility Types: setup
+
+##### generics/utilityTypes/shapes.ts
+
+```ts
+type Circle = { kind: 'circle'; r: number };
+type Square = { kind: 'square'; l?: number };
+type Triangle = { kind: 'triangle'; b: number; h: number };
+type Shape = Circle | Square | Triangle;
+```
+
+---
+
+# Utility Types: Partial / Required / Readonly
+
+##### generics/utilityTypes/partialRequiredAndReadonly.ts
+
+```ts
+import { Circle, Square, Triangle } from './shapes';
+
+const partialCircle: Partial<Circle> = {}; // ✅
+
+const requiredSquare: Required<Square> = { kind: 'square' }; // ❌
+// Property 'l' is missing in type '{ kind: "square"; }' but
+// required in type 'Required<Square>'
+
+const readonlyTriangle: Readonly<Triangle> = { kind: 'triangle', b: 3, h: 12 };
+readonlyTriangle.b = 4; // ❌
+// Cannot assign to 'b' because it is a read-only property
+```
+
+---
+
+# Utility Types: Record
+
+<!-- TODO: type this as corresponding shapes to their strings? -->
+
+##### generics/utilityTypes/record.ts
+
+```ts
+import { Circle, Shape, Square, Triangle } from './shapes';
+
+const shapes: Record<string, Shape> = {
+  myCircle: {} as Circle,
+  mySquare: {} as Square,
+  myTriangle: {} as Triangle,
+};
+```
+
+---
+
+# Utility Types: Omit / Pick
+
+##### generics/utilityTypes/omitAndPick.ts
+
+```ts
+import { Triangle } from './shapes';
+
+// type TriangleKind = { kind: 'triangle' }
+type TriangleKind = Omit<Triangle, 'b' | 'h'>;
+
+// type TriangleProperties = { b: number; h: number }
+type TriangleProperties = Pick<Triangle, 'b' | 'h'>;
+```
+
+---
+
+# Utility Types: Exclude / Extract
+
+##### generics/utilityTypes/excludeAndExtract.ts
+
+```ts
+import { Shape } from './shapes';
+
+// type NotCircle = Square | Triangle
+type NotCircle = Exclude<Shape, { kind: 'circle' }>;
+
+// type ExtractedCircle = Circle
+type ExtractedCircle = Extract<Shape, { kind: 'circle' }>;
+```
+
+---
+
+# Utility Types: Parameters / ReturnType
+
+##### generics/utilityTypes/parametersAndReturnType.ts
+
+```ts
+import { Shape } from './shapes';
+
+const makeShape = <T extends Shape>(params: Shape): Shape => params as T;
+
+// type MakeShapeParams = [params: Shape]
+type MakeShapeParams = Parameters<typeof makeShape>;
+
+// type MakeShapeReturn = Circle | Square | Triangle
+type MakeShapeReturn = ReturnType<typeof makeShape>;
+```
+
+---
+
+# Utility Types: Awaited
+
+##### generics/utilityTypes/awaited.ts
+
+```ts
+import { Circle, Shape } from './shapes';
+
+// type AwaitedCircle = Circle
+type AwaitedCircle = Awaited<Promise<Circle>>;
+
+// type AwaitedShape = Circle | Square | Triangle
+type AwaitedShape = Awaited<Promise<Promise<Promise<Shape>>>>;
+```
+
+---
+
+# Quiz
+
+---
+
+##### generics/quiz.ts
+
+```ts
+type WhatIsThis<T> = T extends object ? { [P in keyof T]+?: WhatIsThis<T[P]>; } : T;
+```
+
+---
+
+##### generics/deepPartial.ts
+
+```ts
+type DeepPartial<T> = T extends object ? { [P in keyof T]+?: DeepPartial<T[P]>; } : T;
+
+type User = { profile: { address: { street: string; city: string; state: string } } };
+
+const user1: User = {}; // ❌
+// Property 'profile' is missing in type '{}' but required in type 'User'
+
+const user2: User = { profile: {} }; // ❌
+// Property 'address' is missing in type '{}' but required in type
+// '{ address: { street: string; city: string; state: string; }; }'
+
+const user3: User = { profile: { address: { street: '123 Fake St' } } }; // ❌
+// Type '{ street: string; }' is missing the following properties from
+// type '{ street: string; city: string; state: string; }': city, state
+
+const user1Too: Partial<User> = {}; // ✅
+const user1Again: DeepPartial<User> = {}; // ✅
+
+const user2Too: Partial<User> = { profile: {} }; // ❌
+// same error as before
+const user2Again: DeepPartial<User> = { profile: {} }; // ✅
+
+const user3Too: Partial<User> = { profile: { address: { street: '123 Fake St' } } }; // ❌
+// same error as before
+const user3Again: DeepPartial<User> = { profile: { address: { street: '123 Fake St' } } }; // ✅
+```
+
+<!-- We could use this pattern to make DeepRequired, DeepReadonly, DeepMutable, etc. -->
+<!-- Because of the + / - for `readonly` and `?` -->
+
+---
+
+# Modules
+
+##### modules/animal.ts
+
+```ts
+export interface Cat { breed: string; age: number }
+export type Dog = { breeds: string[]; age: number };
+export const generateName = () => 'fluffy';
+```
+
+##### modules/app.ts
+
+```ts
+import { Cat, Dog, generateName } from './animal';
+```
+
+##### modules/appToo.ts
+
+```ts
+import { generateName } from './animal';
+import type { Cat, Dog } from './animal';
+```
+
+##### modules/appAgain.ts
+
+```ts
+import { generateName, type Cat, type Dog } from './animal';
+```
+
+<!-- Any explicitly marked type import is guaranteed to be removed from your JavaScript -->
+<!-- tools like Babel can make better assumptions about your code -->
+
+---
+
+# Other Features
+
+---
+
+# Post-fix operators
+
+##### postFix.ts
+
+```ts
+type User = { name?: string, id: string, age?: number };
+
+const validateUser = (user?: User) => {
+  if (!user) throw new Error('Missing user!');
+}
+
+const processUser = (user?: User) => {
+  console.log({ age: user?.age }); // Post-fix safe navigation
+
+  validateUser(user);
+
+  // At this point, we know more than TypeScript:
+  // `user` is not undefined because an error would have been thrown
+
+  const { name: badName } = user; // ❌
+  // Property 'name' does not exist on type 'User | undefined'
+
+  const badId = user.id; // ❌
+  // 'user' is possibly 'undefined'
+
+  const { name } = user!; // ✅ Post-fix non-null assertion
+  const id = user!.id; // ✅ Post-fix non-null assertion
+}
+```
+
+---
+
+# Type Assertions
+
+##### typeAssertions.ts
+
+```ts
+const myCanvas = document.getElementById('main_canvas');
+const { height } = myCanvas!; // ❌
+// Property 'height' does not exist on type 'HTMLElement'
+
+const myCanvasToo = document.getElementById('main_canvas') as HTMLCanvasElement;
+const { height: heightToo } = myCanvasToo!; // ✅
+
+const x = 'hello' as number; // ❌
+// Conversion of type 'string' to type 'number' may be a mistake because ...
+
+const y = 'hello' as any as number; // ✅ (but also ❌)
+const z = 'hello' as unknown as number; // ✅ (but also ❌)
+
+// const someObj: { a: number }
+const someObj = { a: 1 };
+// const someObjToo: { readonly a: 1 }
+const someObjToo = { a: 1 } as const;
+```
+
+---
+
+# Enums vs const objects
+
+---
+
+# Enums
+
+##### enumsVsConstObjects/sockSizes.ts
+
+```ts
+export enum SockSizes {
+  small = 'SM',
+  medium = 'MD',
+  large = 'LG',
+}
+```
+
+<!-- Are not built into JavaScript, is a TypeScript feature -->
+<!-- Are values, types, and namespaces rolled into one which can be confusing at first -->
+<!-- Are concise -->
+<!-- See https://stackoverflow.com/questions/28818849/how-do-the-different-enum-variants-work-in-typescript for exhaustive explanation of different kinds of enums -->
+
+##### enumsVsConstObjects/enums.ts
+
+```ts
+import { SockSizes } from './sockSizes';
+
+const toStringLiteral: 'SM' = SockSizes.small; // ✅
+const fromStringLiteral: SockSizes.small = 'SM'; // ❌
+// Type '"SM"' is not assignable to type 'SockSizes.small'
+
+const outOfStock = (size: SockSizes) => size === SockSizes.small;
+```
+
+---
+
+# const objects
+
+<!-- More closely aligns with pure JavaScript -->
+<!-- Must build the value, type, and namespace individually -->
+<!-- More verbose -->
+
+##### enumsVsConstObjects/shirtSizes.ts
+
+```ts
+export const ShirtSizes = { small: 'SM', medium: 'MD', large: 'LG' } as const;
+// type ShirtSizes = "SM" | "MD" | "LG"
+export type ShirtSizes = typeof ShirtSizes[keyof typeof ShirtSizes];
+export namespace ShirtSizes {
+  export type small = typeof ShirtSizes.small;
+  export type medium = typeof ShirtSizes.medium;
+  export type large = typeof ShirtSizes.large;
+}
+```
+
+##### enumsVsConstObjects/constObjects.ts
+
+```ts
+// (alias) type ShirtSizes = "SM" | "MD" | "LG"
+// (alias) namespace ShirtSizes
+// (alias) const ShirtSizes: Readonly<{ small: "SM"; medium: "MD"; large: "LG"; }>
+// import ShirtSizes
+import { ShirtSizes } from './shirtSizes';
+
+const toStringLiteral: 'SM' = ShirtSizes.small; // ✅
+const fromStringLiteral: ShirtSizes.small = 'SM'; // ✅
+const outOfStock = (size: ShirtSizes) => size === ShirtSizes.large;
+```
+
+---
+
+# Structural Typing vs Nominal Typing
+
+---
 
 # Structural Typing
 
@@ -444,7 +1172,7 @@ myForEachToo([1, 2, 3], (a, i) => console.log(i.toFixed())); // ✅
 <!-- TypeScript's system is structural -->
 <!-- Think duck-typing for a type system -->
 
-##### differences/structuralTyping.ts
+##### structuralTypingVsNominalTyping/structuralTyping.ts
 
 ```ts
 type Ball = { r: number };
@@ -455,41 +1183,20 @@ let ball: Ball = { r: 10 };
 let sphere: Sphere = { r: 20 };
 let tube: Tube = { r: 12, l: 3 };
 
-// ball = sphere; sphere = ball; ball = tube; sphere = tube; // ✅
-// tube = ball; tube = sphere; // ❌
+ball = sphere; // ✅
+sphere = ball; // ✅
+ball = tube; // ✅
+sphere = tube; // ✅
 
-let createBall = (r: number) => ({ r });
-let createSphere = (r: number, metric: boolean) => ({ r: metric ? r : r * 0.39 });
-let createRedBall = (r: number) => ({ r, color: 'red' });
-
-// createSphere = createBall; createBall = createRedBall; // ✅
-// createBall = createSphere; // ❌
-// createRedBall = createBall; // ❌
+tube = ball; // ❌
+// Property 'l' is missing in type 'Ball' but required in type 'Tube'.
+tube = sphere; // ❌
+// Property 'l' is missing in type 'Ball' but required in type 'Tube'.
 ```
 
-<!-- First ❌ -->
-<!-- Property 'l' is missing in type 'Ball' but required in type 'Tube'. -->
-
-<!-- Because a ball does not have a length, then it cannot be -->
-<!-- assigned to the tube variable. However, all of the members -->
-<!-- of Ball are inside Tube, and so it can be assigned. -->
-
-<!-- Second ❌ -->
-<!-- Type '(r: number, metric: boolean) => { r: number; }' is not assignable to type '(r: number) => { r: number; }'. -->
-  <!-- Target signature provides too few arguments. Expected 2 or more, but got 1. -->
-
-<!-- Third ❌ -->
-<!-- Type '(r: number) => { r: number; }' is not assignable to type '(r: number) => { r: number; color: string; }'. -->
-  <!-- Property 'color' is missing in type '{ r: number; }' but required in type '{ r: number; color: string; }' -->
+<!-- Because a ball does not have a length, then it cannot be assigned to the tube variable. However, all of the members of Ball are inside Tube, so the tube can be assigned to the ball variable. -->
 
 ---
-
-<style scoped>
-  h1 {
-    font-size: 2rem;
-    text-align: center;
-  }
-</style>
 
 # Nominal Typing
 
@@ -498,7 +1205,7 @@ let createRedBall = (r: number) => ({ r, color: 'red' });
 <!-- Even if types have the same data, you can't assign across types -->
 <!-- We can still get nominal typing from TypeScript like: -->
 
-##### differences/nominalTyping.ts
+##### structuralTypingVsNominalTyping/nominalTyping.ts
 
 ```ts
 type USD = number & { __brand: 'USD' };
@@ -508,7 +1215,7 @@ type EUR = Brand<number, 'EUR'>;
 const usd = 10 as USD; // `as`
 const eur = 10 as EUR; // `as`
 
-const gross = (net: USD, tax: USD): USD => (net + tax) as USD;
+const gross = (net: USD, tax: USD): USD => (net + tax) as USD; // `as`
 
 gross(usd, usd); // ✅
 gross(eur, usd); // ❌
@@ -531,16 +1238,16 @@ gross(eur, usd); // ❌
   </div>
   <div class="col" style="width:100%;text-align:center">
 
-# Type
+# Type Alias
   </div>
 </div>
 
-<!-- For the most part, interchangable -->
+<!-- For the most part, interchangable / the same, however, we can reopen interfaces for better or for (probably) worse -->
 
 <div class="container">
   <div class="col" style="width:100%">
 
-##### differences/interface.ts
+##### interfaceVsTypeAlias/interface.ts
 
 ```ts
 interface Animal {
@@ -565,7 +1272,7 @@ interface Bear extends Animal {
 
   <div class="col" style="width:100%">
 
-##### differences/typeAlias.ts
+##### interfaceVsTypeAlias/typeAlias.ts
 
 ```ts
 type Animal = {
@@ -589,42 +1296,243 @@ type Bear = Animal & {
 
 ---
 
+# <!--fit-->JSDoc
+
+---
+
+# Unsafe -> Safe
+
+1. A type-system based only on inference with JavaScript code
+2. Incremental typing in JavaScript via JSDoc
+3. Using // @ts-check in a JavaScript file
+4. TypeScript code
+5. TypeScript with strict enabled
+
+---
+
+# Basic Example
+
+##### jsdoc/basic.js
+
+```js
+/** @type {number} */
+var x;
+ 
+x = false; // ✅ ... wait, what?
+```
+
+##### jsdoc/basicFixed.js
+
+```js
+// @ts-check
+
+/** @type {number} */
+var x;
+ 
+x = false; // ❌
+// Type 'boolean' is not assignable to type 'number'.
+```
+
+---
+
+# Defaults
+
+##### jsdoc/defaults.js
+
+```js
+// @ts-check
+
+// var myObj: { a: number }
+var myObj = { a: 1 };
+myObj.b = 2; // ✅
+// This works because `myObj` is a looser effective type definition:
+// var myObj: { [x: string]: any } 
+
+// var i: any, var j: any, var k: any
+var i, j = undefined, k = null;
+
+// var foo: (a: any, b: any) => never[]
+var foo = (a, b) => {
+  if (!a) a = 1; // ✅
+
+  return [];
+};
+
+// const ary: any[]
+const ary = foo(); // ✅
+ary.push(2); // ✅
+foo(1, 'a', []); // ❌
+// Expected 0-2 arguments, but got 3
+```
+
+---
+
+# @type
+
+##### jsdoc/type.js
+
+```js
+// @ts-check
+
+/** @type {number | string} */
+var numberOrString = Math.random() < 0.5 ? 'hello' : 100;
+// var typeAssertedNumber: number
+var typeAssertedNumber = /** @type {number} */ (numberOrString);
+
+/** @type {number[]} */
+var numbers;
+
+/** @type {(s: string, b?: boolean) => number} */
+var stringAndMaybeBooleanToNumber;
+
+/** @type {Record<string, number>} */
+var namedNumbers;
+ 
+/** @type {HTMLElement | null} */
+var myElement = document.querySelector('input[name="login"]');
+```
+
+---
+
+# @typedef
+
+##### jsdoc/typedef.js
+
+```js
+// @ts-check
+
+/**
+ * @typedef {{
+*   name: string;
+*   age?: number;
+*   alive?: boolean;
+* }} UserProps
+*/
+
+/** @typedef {{ enabled?: boolean }} Configuration */
+
+class User extends React.Component {
+ /** @param {UserProps} props */
+ constructor(props) { super(props); }
+
+ /** @type {(configuration: Configuration) => void} */
+ configure({ enabled }) {}
+
+ /** @type {(todo: { how?: string; why?: string; when: Date; }) => void} */
+ performTask(todo) {}
+}
+```
+
+---
+
+# Usage: Before
+
+---
+
+##### jsdoc/usage/before/size.js
+
+```js
+var Sizes = { sm: 'SM', md: 'MD', lg: 'LG' };
+module.exports = { Sizes };
+```
+
+##### jsdoc/usage/before/js.js
+
+```js
+var { Sizes } = require('./size');
+function inStock(size) { return size === Sizes.sm; }
+module.exports = { Sizes, inStock };
+```
+
+##### jsdoc/usage/before/ts.ts
+
+```ts
+import { Sizes, inStock } from './js';
+// const placeOrder: (size: any) => boolean
+const placeOrder = (size) => inStock(size);
+placeOrder(Sizes.lg); // ✅ -> false
+placeOrder('XS'); // ✅ (should be ❌)
+```
+
+---
+
+# Usage: After
+
+---
+
+##### jsdoc/usage/after/size.js
+
+```js
+// @ts-check
+/** @typedef { { sm: 'SM', md: 'MD', lg: 'LG' } } TSizes */
+/** @typedef { TSizes[keyof TSizes] } Size */
+/** @type { TSizes } */
+var Sizes = { sm: 'SM', md: 'MD', lg: 'LG' };
+module.exports = { Sizes };
+```
+
+##### jsdoc/usage/after/js.js
+
+```js
+// @ts-check
+/** @typedef { import('./size').Size } Size */
+var { Sizes } = require('./size');
+/** @type { (size: Size) => boolean } */
+function inStock(size) { return size === Sizes.sm; }
+module.exports = { Sizes, inStock };
+```
+
+##### jsdoc/usage/after/ts.ts
+
+```ts
+import { Sizes, inStock, type Size } from './js';
+const placeOrder = (size: Size) => inStock(size);
+placeOrder(Sizes.lg); // ✅ -> false
+placeOrder('XS'); // ❌ (yay!)
+// Argument of type '"XS"' is not assignable to parameter of type 'Size'
+```
+
+---
+
+# FAQs: Variance
+
+##### faqs/variance.ts
+
+```ts
+type Animal = {}
+type Dog = Animal & {}
+type Cat = Animal & {}
+
+const trainDog = (d: Dog) => {}
+const cloneAnimal = (source: Animal, done: (result: Animal) => void): void => {}
+const animal = {} as Animal;
+const cat = {} as Cat;
+
+cloneAnimal(animal, trainDog); // ✅
+cloneAnimal(cat, trainDog); // ✅ (should be ❌)
+// Expected a runtime error here because we
+// end up invoking 'trainDog' with a 'Cat'
+```
+
+<!-- Without getting too in the weeds... -->
+<!-- This is an unsoundness resulting from the lack of explicit covariant/contravariant annotations in the type system. -->
+<!-- Because of this omission, TypeScript must be more permissive. -->
+
+---
+
+# The End
+
+---
+
 <!--color: white-->
 
 Questions
 
 ![bg](https://gifdb.com/images/high/confused-nerd-steve-brule-eixtr1f0qii8fthl.gif)
 
-<!-- Should I pamphletize this presentation? -->
-
-<!-- Type Assertions https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions -->
-
-<!-- ? and ! -->
-
-<!-- In JavaScript, if you access a property that doesn’t exist, you’ll get the value undefined rather than a runtime error. Because of this, when you read from an optional property, you’ll have to check for undefined before using it.
-
-function printName(obj: { first: string; last?: string }) {
-  // Error - might crash if 'obj.last' wasn't provided!
-  console.log(obj.last.toUpperCase());
-'obj.last' is possibly 'undefined'.
-  if (obj.last !== undefined) {
-    // OK
-    console.log(obj.last.toUpperCase());
-  }
- 
-  // A safe alternative using modern JavaScript syntax:
-  console.log(obj.last?.toUpperCase());
-} -->
-
-<!-- Non-null Assertion Operator (Postfix!)
-TypeScript also has a special syntax for removing null and undefined from a type without doing any explicit checking. Writing ! after any expression is effectively a type assertion that the value isn’t null or undefined:
-
-function liveDangerously(x?: number | null) {
-  // No error
-  console.log(x!.toFixed());
-}
-Try
-Just like other type assertions, this doesn’t change the runtime behavior of your code, so it’s important to only use ! when you know that the value can’t be null or undefined. -->
+<!-- Should I pamphletize this presentation?: YES -->
 
 <!-- Generics section -->
 <!-- variants, covariants, invariants, contravariants -->
+
+<!-- TODO: tests / exercises wherein people fix actual problems to solidify learning -->

@@ -5,7 +5,7 @@ type EUR = Brand<number, 'EUR'>;
 const usd = 10 as USD; // `as`
 const eur = 10 as EUR; // `as`
 
-const gross = (net: USD, tax: USD): USD => (net + tax) as USD;
+const gross = (net: USD, tax: USD): USD => (net + tax) as USD; // `as`
 
 gross(usd, usd); // ✅
 gross(eur, usd); // ❌
