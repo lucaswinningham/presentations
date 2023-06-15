@@ -1,18 +1,18 @@
 // @ts-check
 
 /** @type {number | string} */
-var numberOrString = Math.random() < 0.5 ? 'hello' : 100;
-// var typeAssertedNumber: number
-var typeAssertedNumber = /** @type {number} */ (numberOrString);
+var numOrStr = Math.random() < 0.5 ? 'hello' : 100;
+// var numOrStrAssertedToOnlyNum: number
+var numOrStrAssertedToOnlyNum = /** @type {number} */ (numOrStr);
 
 /** @type {number[]} */
 var numbers;
 
 /** @type {(s: string, b?: boolean) => number} */
-var stringAndMaybeBooleanToNumber;
+var strAndMaybeBoolToNum;
 
 /** @type {Record<string, number>} */
 var namedNumbers;
  
-/** @type {HTMLElement | null} */
-var myElement = document.querySelector('input[name="login"]');
+/** @type {Element | null} */
+var myElement = document.querySelector('.foo');

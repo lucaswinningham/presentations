@@ -1296,17 +1296,50 @@ type Bear = Animal & {
 
 ---
 
-# <!--fit-->JSDoc
+# FAQs: Variance
+
+##### faqs/variance.ts
+
+```ts
+type Animal = {}
+type Dog = Animal & {}
+type Cat = Animal & {}
+
+const trainDog = (d: Dog) => {}
+const cloneAnimal = (source: Animal, done: (result: Animal) => void): void => {}
+const animal = {} as Animal;
+const cat = {} as Cat;
+
+cloneAnimal(animal, trainDog); // ✅
+cloneAnimal(cat, trainDog); // ✅ (should be ❌)
+// Expected an error here because we
+// end up invoking 'trainDog' with a 'Cat'
+```
+
+<!-- Without getting too in the weeds... -->
+<!-- This is an unsoundness resulting from the lack of explicit covariant/contravariant annotations in the type system. -->
+<!-- Because of this omission, TypeScript must be more permissive. -->
 
 ---
 
-# Unsafe -> Safe
+# <!--fit-->JSDoc
 
-1. A type-system based only on inference with JavaScript code
-2. Incremental typing in JavaScript via JSDoc
+<!-- What is JSDoc? -->
+<!-- It's a way to add type safety to pure JavaScript files -->
+<!-- There are times when, from a consumer TypeScript file, we want to consume files that are in pure JavaScript and are too large to convert to a TypeScript file -->
+<!-- In those instances we just want to add type safety to those parts of that JavaScript file so that our consumer TypeScript file can carry on with its own type safety -->
+<!-- We can do this by adding type annotations with JSDoc comments in the consumee pure JavaScript file -->
+<!-- This means that we have spectrum of type safety when it comes to JavaScript and TypeScript -->
+
+---
+
+# Type Safety In Order Of Strictness
+
+1. TypeScript with strict enabled
+2. TypeScript code
 3. Using // @ts-check in a JavaScript file
-4. TypeScript code
-5. TypeScript with strict enabled
+4. Incremental typing in JavaScript via JSDoc
+5. A type-system based only on inference with JavaScript code
 
 ---
 
@@ -1345,8 +1378,10 @@ x = false; // ❌
 // var myObj: { a: number }
 var myObj = { a: 1 };
 myObj.b = 2; // ✅
-// This works because `myObj` is a looser effective type definition:
-// var myObj: { [x: string]: any } 
+// Would be ❌ in a .ts with:
+// Property 'b' does not exist on type '{ a: number; }'
+// This works because `myObj` is a looser effective type definition in a .js file:
+// var myObj: { [x: string]: any }
 
 // var i: any, var j: any, var k: any
 var i, j = undefined, k = null;
@@ -1365,69 +1400,165 @@ foo(1, 'a', []); // ❌
 // Expected 0-2 arguments, but got 3
 ```
 
+<!-- No way to specify optionality on params before ES2015, all function params are considered optional; however, supplying too many arguments results in an error as that _can_ be checked by TypeScript -->
+
 ---
 
 # @type
 
+<!-- @type is a way to annotate variable and function declarations -->
+<!-- Here, we have a JavaScript file on the left and its corollary TypeScript on that right for reference -->
+
+
+<div class="container">
+  <div class="col" style="width:100%">
+
 ##### jsdoc/type.js
 
-```js
+```ts
 // @ts-check
 
 /** @type {number | string} */
-var numberOrString = Math.random() < 0.5 ? 'hello' : 100;
-// var typeAssertedNumber: number
-var typeAssertedNumber = /** @type {number} */ (numberOrString);
+var numOrStr = Math.random() < 0.5 ? 'hello' : 100;
+// var numOrStrAssertedToOnlyNum: number
+var numOrStrAssertedToOnlyNum = /** @type {number} */ (numOrStr);
 
 /** @type {number[]} */
 var numbers;
 
 /** @type {(s: string, b?: boolean) => number} */
-var stringAndMaybeBooleanToNumber;
+var strAndMaybeBoolToNum;
 
 /** @type {Record<string, number>} */
 var namedNumbers;
  
-/** @type {HTMLElement | null} */
-var myElement = document.querySelector('input[name="login"]');
+/** @type {Element | null} */
+var myElement = document.querySelector('.foo');
 ```
+  </div>
+
+  <div class="col" style="margin:1rem"></div>
+
+  <div class="col" style="width:100%">
+
+##### jsdoc/type.ts
+
+```ts
+
+
+// const numOrStr: "hello" | 100
+const numOrStr = Math.random() < 0.5 ? 'hello' : 100;
+// const numOrStrAssertedToOnlyNum: number
+const numOrStrAssertedToOnlyNum = numOrStr as number;
+
+// const numbers: number[]
+let numbers: number[];
+
+// let strAndMaybeBoolToNum: (s: string, b?: boolean) => number
+let strAndMaybeBoolToNum: (s: string, b?: boolean) => number;
+
+// let namedNumbers: Record<string, number>
+let namedNumbers: Record<string, number>;
+ 
+// const myElement: Element | null
+const myElement: Element | null = document.querySelector('.foo');
+``` 
+  </div>
+</div>
 
 ---
 
 # @typedef
 
+<!-- @typedef is a way to declare type aliases so that they can be used in the rest of the JavaScript file -->
+<!-- They also are available for module importation automatically, more later -->
+<!-- Same thing here, we have a JavaScript file on the left and its corollary TypeScript on that right for reference -->
+
+
+<div class="container">
+  <div class="col" style="width:100%">
+
 ##### jsdoc/typedef.js
 
-```js
+```ts
 // @ts-check
 
 /**
  * @typedef {{
-*   name: string;
-*   age?: number;
-*   alive?: boolean;
-* }} UserProps
-*/
+ *   name: string;
+ *   age?: number;
+ *   alive?: boolean;
+ * }} UserProps
+ */
 
 /** @typedef {{ enabled?: boolean }} Configuration */
 
 class User extends React.Component {
- /** @param {UserProps} props */
- constructor(props) { super(props); }
+  /** @param {UserProps} props */
+  constructor(props) { super(props); }
 
- /** @type {(configuration: Configuration) => void} */
- configure({ enabled }) {}
+  /** @type {(configuration: Configuration) => void} */
+  configure({ enabled }) {}
 
- /** @type {(todo: { how?: string; why?: string; when: Date; }) => void} */
- performTask(todo) {}
+  /** @type {(todo: { what: string; dueBy?: Date; }) => void} */
+  performTask(todo) {}
 }
 ```
+  </div>
+
+  <div class="col" style="margin:1rem"></div>
+
+  <div class="col" style="width:100%">
+
+##### jsdoc/typedef.ts
+
+```ts
+
+
+
+type UserProps = {
+  name: string;
+  age?: number;
+  alive?: boolean;
+};
+
+
+type Configuration = { enabled?: boolean };
+
+class User extends React.Component {
+
+  constructor(props: UserProps) { super(props); }
+
+
+  configure({ enabled }: Configuration) {}
+
+
+  performTask(todo: { what: string; dueBy?: Date; }): void {}   
+}
+``` 
+  </div>
+</div>
 
 ---
 
 # Usage: Before
 
+<!-- Let's look at how we might go about implementing this in JavaScript files for a consumer TypeScript file -->
+
 ---
+
+<!-- Say, we have a TypeScript file that depends on a pure JavaScript file and that JavaScript file depends on another pure JavaScript file -->
+<!-- For this example, our consumer TypeScript file is `ts.ts`, its dependent JavaScript file is `js.js` and its dependent is `size.js` -->
+<!-- In `size.js`, we'll have an object called `Sizes` with readable keys that relate to values that mean something to an api, say, think an enum -->
+<!-- This object will house just small, medium, and large keys and values -->
+<!-- In `size.js`, we export the `Sizes` object for consumers -->
+<!-- Now in `js.js`, we export a function called `inStock` that takes a value of the `Sizes` object and uses the same values to determine if we have that size in stock returning a boolean as an answer to that question -->
+<!-- We'll reexport the `Sizes` object as well as our `inStock` function for consumers -->
+<!-- In the end consumer `ts.ts` file, we want a way to place an order knowing that the requested size is in stock -->
+<!-- So we'll import the `Sizes` object and the `inStock` function from our `js.js` file into our `ts.ts` and use those to both declare a `placeOrder` function and to call that function with `Sizes` values -->
+<!-- As you would expect, calling `placeOrder` with one of the deterimined `Sizes` works -->
+<!-- But we want for TypeScript to error when we call that function with an argument other than what sizes we offer -->
+<!-- Let's look at how we can accomplish this... -->
 
 ##### jsdoc/usage/before/size.js
 
@@ -1460,6 +1591,18 @@ placeOrder('XS'); // ✅ (should be ❌)
 
 ---
 
+<!-- One way to do this is to go back to the `size.js` file and start adding annotations there -->
+<!-- We can type the `Sizes` object with literal string values with a @typedef type alias definition and we'll call that `TSizes` -->
+<!-- We can then infer the values of `TSizes` and call that type `Size` -->
+<!-- We still export the `Sizes` object -->
+<!-- Then, in our `js.js` file we can actually import the `Size` type alias definition even though we didn't explicitly export it -->
+<!-- This is important to know, any JSDoc type alias definition can be imported from a consumer -->
+<!-- This also means that if we import a type alias definition from a source file into a target file, any consumer of the target file can import the definition as well, as we'll see -->
+<!-- So we use the `Size` type to annotate that our `inStock` function expects a parameter of type `Size` and that it returns a boolean type value -->
+<!-- The exports remain the same as before -->
+<!-- Now, in our `ts.ts` file, we can now import the `Size` type from our `js.js` file and use it! -->
+<!-- So we can type our `placeOrder` function to also expect a parameter of type `Size` and now if we try to call it with an unknown size, TypeScript will error! -->
+
 ##### jsdoc/usage/after/size.js
 
 ```js
@@ -1491,32 +1634,6 @@ placeOrder(Sizes.lg); // ✅ -> false
 placeOrder('XS'); // ❌ (yay!)
 // Argument of type '"XS"' is not assignable to parameter of type 'Size'
 ```
-
----
-
-# FAQs: Variance
-
-##### faqs/variance.ts
-
-```ts
-type Animal = {}
-type Dog = Animal & {}
-type Cat = Animal & {}
-
-const trainDog = (d: Dog) => {}
-const cloneAnimal = (source: Animal, done: (result: Animal) => void): void => {}
-const animal = {} as Animal;
-const cat = {} as Cat;
-
-cloneAnimal(animal, trainDog); // ✅
-cloneAnimal(cat, trainDog); // ✅ (should be ❌)
-// Expected a runtime error here because we
-// end up invoking 'trainDog' with a 'Cat'
-```
-
-<!-- Without getting too in the weeds... -->
-<!-- This is an unsoundness resulting from the lack of explicit covariant/contravariant annotations in the type system. -->
-<!-- Because of this omission, TypeScript must be more permissive. -->
 
 ---
 

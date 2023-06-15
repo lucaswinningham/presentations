@@ -9,5 +9,5 @@ const cat = {} as Cat;
 
 cloneAnimal(animal, trainDog); // ✅
 cloneAnimal(cat, trainDog); // ✅ (should be ❌)
-// Expected a runtime error here because we
+// Expected an error here because we
 // end up invoking 'trainDog' with a 'Cat'

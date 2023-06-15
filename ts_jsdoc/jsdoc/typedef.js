@@ -2,21 +2,21 @@
 
 /**
  * @typedef {{
-*   name: string;
-*   age?: number;
-*   alive?: boolean;
-* }} UserProps
-*/
+ *   name: string;
+ *   age?: number;
+ *   alive?: boolean;
+ * }} UserProps
+ */
 
 /** @typedef {{ enabled?: boolean }} Configuration */
 
 class User extends React.Component {
- /** @param {UserProps} props */
- constructor(props) { super(props); }
+  /** @param {UserProps} props */
+  constructor(props) { super(props); }
 
- /** @type {(configuration: Configuration) => void} */
- configure({ enabled }) {}
+  /** @type {(configuration: Configuration) => void} */
+  configure({ enabled }) {}
 
- /** @type {(todo: { how?: string; why?: string; when: Date; }) => void} */
- performTask(todo) {}
+  /** @type {(todo: { what: string; dueBy?: Date; }) => void} */
+  performTask(todo) {}
 }
