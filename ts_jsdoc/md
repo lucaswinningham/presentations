@@ -1324,10 +1324,9 @@ cloneAnimal(cat, trainDog); // ✅ (should be ❌)
 
 # <!--fit-->JSDoc
 
-<!-- What is JSDoc? -->
+<!-- If you don't know what JSDoc is, -->
 <!-- It's a way to add type safety to pure JavaScript files -->
-<!-- There are times when, from a consumer TypeScript file, we want to consume files that are in pure JavaScript and are too large to convert to a TypeScript file -->
-<!-- In those instances we just want to add type safety to those parts of that JavaScript file so that our consumer TypeScript file can carry on with its own type safety -->
+<!-- There are times when, from a consumer TypeScript file, we want to consume files that are in pure JavaScript and it doesn't make sense to convert to a TypeScript file; whether they're too large and it would be out of scope, changing it to TypeScript would have an uncomfortable impact, or you simply just want type safety from a subset of a file. -->
 <!-- We can do this by adding type annotations with JSDoc comments in the consumee pure JavaScript file -->
 <!-- This means that we have spectrum of type safety when it comes to JavaScript and TypeScript -->
 
@@ -1335,15 +1334,26 @@ cloneAnimal(cat, trainDog); // ✅ (should be ❌)
 
 # Type Safety In Order Of Strictness
 
-1. TypeScript with strict enabled
+1. TypeScript code with strict enabled
 2. TypeScript code
-3. Using // @ts-check in a JavaScript file
-4. Incremental typing in JavaScript via JSDoc
-5. A type-system based only on inference with JavaScript code
+3. Incremental typing using JSDoc in a pure JavaScript file with // @ts-check
+4. Incremental typing using JSDoc in a pure JavaScript file
+5. A type-system based only on inference with pure JavaScript code
+
+<!-- Pause -->
 
 ---
 
 # Basic Example
+
+<!-- So here's a basic example -->
+<!-- Say we have an `x` variable and we know that it's a number so we'll add a type annotation to its declaration -->
+<!-- If later we try to assign a value of another type, like a boolean value false, TypeScript doesn't emit an error. -->
+<!-- That's interesting, we would expect it to emit an error since false is obviously not a number. -->
+<!-- Well, let's fix that by adding the ts-check comment at the top of the file. -->
+<!-- E voila, now, we see that TypeScript is emitting a helpful error. -->
+
+<!-- Pause -->
 
 ##### jsdoc/basic.js
 
@@ -1369,6 +1379,23 @@ x = false; // ❌
 ---
 
 # Defaults
+
+<!-- Let's look at some of the quirks of using JSDoc compared to actual TypeScript -->
+<!-- Say we have a simple object variable that's instantiated with literal keys and values. -->
+<!-- Then later we try to assign a value to a key that wasn't specified at the time of instantiation. -->
+<!-- In a pure JavaScript file with ts-check turned on, this is okay, which deviates from actual TypeScript files. -->
+<!-- In JavaScript with JSDoc, this object variable is given a looser effective type definition that it would have been given in a TypeScript file so that we can have _incremental_ type safety meaning that we don't want too many things to break as a result of our decision to add a type to this variable. -->
+
+<!-- Pause -->
+
+<!-- Next, any variable that's given a value at instantiation of undefined, null, or not given a value at all are all assumed to be of type `any`, loosest type definition TypeScript has. -->
+<!-- The same goes for function parameters and return values of functions -->
+
+<!-- Pause -->
+
+<!-- And since there's no way to specify optionality on params before ES2015 (which ES3 is assumed to be the target level as it's recognized by the most browsers), all function params are considered optional; however, supplying too many arguments results in an error as that _can_ be checked by TypeScript and assumed to be an actual error -->
+
+<!-- Pause -->
 
 ##### jsdoc/defaults.js
 
@@ -1400,14 +1427,21 @@ foo(1, 'a', []); // ❌
 // Expected 0-2 arguments, but got 3
 ```
 
-<!-- No way to specify optionality on params before ES2015, all function params are considered optional; however, supplying too many arguments results in an error as that _can_ be checked by TypeScript -->
-
 ---
 
 # @type
 
+<!-- Let's look at @type like we saw earlier -->
 <!-- @type is a way to annotate variable and function declarations -->
 <!-- Here, we have a JavaScript file on the left and its corollary TypeScript on that right for reference -->
+<!-- So, if we want to declare a variable that can be a string or number, we can do that by adding the type definition in between the curlies in the @type statement just before the variable declaration -->
+<!-- Here, we literally have a `numOrStr` variable that can be either a number or string at runtime -->
+<!-- We can have another variable that can consume that `numOrStr` variable and TypeScript will infer that its type will also be a number or a string -->
+<!-- But if we wanted to tell TypeScript that we know this will be a number, we can cast its type, or assert its type, to be a number like we would in TypeScript with the `as` keyword using an inline @type statement with the asserted type in the curlies -->
+<!-- Furthermore, we can continue to let TypeScript know what type other variables will be using the same syntax as is used for `numOrStr`. -->
+<!-- All we have to do is tell TypeScript what the types are by using TypeScript syntax in between the curlies at each statement -->
+
+<!-- Pause -->
 
 
 <div class="container">
@@ -1470,9 +1504,16 @@ const myElement: Element | null = document.querySelector('.foo');
 
 # @typedef
 
-<!-- @typedef is a way to declare type aliases so that they can be used in the rest of the JavaScript file -->
-<!-- They also are available for module importation automatically, more later -->
+<!-- For complicated types that we want to use in the rest of the annotated JavaScript file or for types that we want to make automagically available for consumption (more on that later), we can alias types using @typedef -->
 <!-- Same thing here, we have a JavaScript file on the left and its corollary TypeScript on that right for reference -->
+<!-- Imagine we want to define a type alias for the props that a component can expect, it's the same idea as before with @type; just add TypeScript syntax in between curlies (you can even use multiline if you wish like for `UserProps`), the difference here is that we give the type alias at the end -->
+<!-- We can define as many type aliases as we'd like to set us up for the rest of the file, or to simply make the type alias available for import -->
+<!-- I'm using a class based React component here as we might encounter more of those proportionally to pure JavaScript files. -->
+<!-- Notice in the constructor that we're using another @props statement, we can use this if we just want to tell TypeScript the type of the parameters for a function instead of typing the whole function -->
+<!-- Notice that in `configure` and `performTask` that we can type destructured and non-destructured parameters. -->
+<!-- We don't even have to name the parameter the same in the typedef as we do in the actual code but that's in direct contrast to @param where we _must_ name them the same. -->
+
+<!-- Pause -->
 
 
 <div class="container">
@@ -1501,7 +1542,7 @@ class User extends React.Component {
   configure({ enabled }) {}
 
   /** @type {(todo: { what: string; dueBy?: Date; }) => void} */
-  performTask(todo) {}
+  performTask(aTodo) {}
 }
 ```
   </div>
@@ -1549,15 +1590,18 @@ class User extends React.Component {
 
 <!-- Say, we have a TypeScript file that depends on a pure JavaScript file and that JavaScript file depends on another pure JavaScript file -->
 <!-- For this example, our consumer TypeScript file is `ts.ts`, its dependent JavaScript file is `js.js` and its dependent is `size.js` -->
-<!-- In `size.js`, we'll have an object called `Sizes` with readable keys that relate to values that mean something to an api, say, think an enum -->
+<!-- In `size.js`, we'll have an object called `Sizes` with readable keys that relate to values that mean something to an api, say, so think an enum -->
 <!-- This object will house just small, medium, and large keys and values -->
 <!-- In `size.js`, we export the `Sizes` object for consumers -->
 <!-- Now in `js.js`, we export a function called `inStock` that takes a value of the `Sizes` object and uses the same values to determine if we have that size in stock returning a boolean as an answer to that question -->
-<!-- We'll reexport the `Sizes` object as well as our `inStock` function for consumers -->
+<!-- We'll _re_export the `Sizes` object as well as our `inStock` function for consumers -->
 <!-- In the end consumer `ts.ts` file, we want a way to place an order knowing that the requested size is in stock -->
-<!-- So we'll import the `Sizes` object and the `inStock` function from our `js.js` file into our `ts.ts` and use those to both declare a `placeOrder` function and to call that function with `Sizes` values -->
+<!-- So we'll import the `Sizes` object and the `inStock` function from our `js.js` file into `ts.ts` and use those to both declare a `placeOrder` function and to call that function with `Sizes` values -->
 <!-- As you would expect, calling `placeOrder` with one of the deterimined `Sizes` works -->
 <!-- But we want for TypeScript to error when we call that function with an argument other than what sizes we offer -->
+
+<!-- Pause -->
+
 <!-- Let's look at how we can accomplish this... -->
 
 ##### jsdoc/usage/before/size.js
@@ -1592,25 +1636,27 @@ placeOrder('XS'); // ✅ (should be ❌)
 ---
 
 <!-- One way to do this is to go back to the `size.js` file and start adding annotations there -->
-<!-- We can type the `Sizes` object with literal string values with a @typedef type alias definition and we'll call that `TSizes` -->
-<!-- We can then infer the values of `TSizes` and call that type `Size` -->
+<!-- We can add an inline type assertion to assert the `Sizes` object as a `const` which makes the entries readonly and effectively "freezes" it allowing TypeScript to know that the values will never change and so it can interpret them as string literals instead of any `string` with literal string values with a @typedef type alias definition and we'll call that `TSizes` -->
+<!-- We can then infer the `typeof` the `Sizes` value and alias that as `TSizes` -->
+<!-- We can then also infer the values of `TSizes` and alias that as `Size` -->
 <!-- We still export the `Sizes` object -->
 <!-- Then, in our `js.js` file we can actually import the `Size` type alias definition even though we didn't explicitly export it -->
 <!-- This is important to know, any JSDoc type alias definition can be imported from a consumer -->
 <!-- This also means that if we import a type alias definition from a source file into a target file, any consumer of the target file can import the definition as well, as we'll see -->
 <!-- So we use the `Size` type to annotate that our `inStock` function expects a parameter of type `Size` and that it returns a boolean type value -->
 <!-- The exports remain the same as before -->
-<!-- Now, in our `ts.ts` file, we can now import the `Size` type from our `js.js` file and use it! -->
+<!-- Now, in our `ts.ts` file, we can now import the `Size` type as well from our `js.js` file and use it! -->
 <!-- So we can type our `placeOrder` function to also expect a parameter of type `Size` and now if we try to call it with an unknown size, TypeScript will error! -->
+
+<!-- Pause -->
 
 ##### jsdoc/usage/after/size.js
 
 ```js
 // @ts-check
-/** @typedef { { sm: 'SM', md: 'MD', lg: 'LG' } } TSizes */
+var Sizes = /** @type { const } */ ({ sm: 'SM', md: 'MD', lg: 'LG' });
+/** @typedef { typeof Sizes } TSizes */
 /** @typedef { TSizes[keyof TSizes] } Size */
-/** @type { TSizes } */
-var Sizes = { sm: 'SM', md: 'MD', lg: 'LG' };
 module.exports = { Sizes };
 ```
 

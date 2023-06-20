@@ -18,5 +18,5 @@ class User extends React.Component {
   configure({ enabled }) {}
 
   /** @type {(todo: { what: string; dueBy?: Date; }) => void} */
-  performTask(todo) {}
+  performTask(aTodo) {}
 }
