@@ -1,6 +1,3 @@
-const f = (a: any) => a.b(); // ✅ (but also ❌)
-
-const g = (a: unknown) => a.b(); // ❌
-// 'a' is of type 'unknown'
-
-const h = (a: unknown) => a; // ✅
+const f = (a: any) => a.b(); // ✅
+const g = (a: unknown) => a; // ✅
+const h = (a: unknown) => a.b(); // ❌

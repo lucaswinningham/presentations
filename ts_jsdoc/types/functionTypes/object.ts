@@ -1,16 +1,9 @@
-type MyObject = object; // `any` adjacent
-
-let myObject: MyObject;
+let myObject: object;
 
 myObject = {}; // ✅
 myObject = { hi: 'hey' }; // ✅
 
-// Because functions;
-//  - have Object.prototype in their prototype chain
-//  - are instanceof Object
-//  - you can call Object.keys on them
-//  - etc.
 myObject = () => {}; // ✅
-
+myObject = []; // ✅
+myObject = /foo/; // ✅
 myObject = 42; // ❌
-// Type 'number' is not assignable to type 'object'

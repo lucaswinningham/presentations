@@ -1,10 +1,10 @@
 type Flag = 'auto' | 'all' | 'rec'; // union of string literals
 type Options = { width: number; height: number };
 
-const configure = (x: Options | Flag) => {};
+const configure = (configurationArgument: Options | Flag) => {};
 
-configure({ width: 100, height: 100 }); // ✅
 configure('auto'); // ✅
+configure({ width: 100, height: 100 }); // ✅
 configure('automatic'); // ❌
-// Argument of type '"automatic"' is not
-//   assignable to parameter of type 'Options | Flag'
+configure({ width: 50 }); // ❌
+configure({ breadth: 10, height: 20 }); // ❌

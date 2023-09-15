@@ -143,7 +143,7 @@ const age: number = 25; // at heart
 const isAwesome: boolean = true;
 
 // const secondsUntilDeceased: bigint
-const secondsUntilDeceased = BigInt(10e1000);
+const secondsUntilDeceased = BigInt(10e307);
 
 // let access: symbol
 let access: symbol;
